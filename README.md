@@ -29,7 +29,7 @@ For more information, be sure to check out our [Open WebUI Documentation](https:
 
 - 🤝 **Ollama/OpenAI API Integration**: Effortlessly integrate OpenAI-compatible APIs for versatile conversations alongside Ollama models. Customize the OpenAI API URL to link with **LMStudio, GroqCloud, Mistral, OpenRouter, and more**.
 
-- 🐳 **Docker Model Runner**: Bundled Ollama-compatible model runner with equal functionality to Ollama, running on a separate port (11435) within the same Docker container. Enable with `USE_DOCKER_MODEL_RUNNER=true` build arg for seamless multi-provider support.
+- 🐳 **Docker Model Runner**: Run a secondary Ollama instance on port 11435 within the same Docker container for multi-provider support. Enable with `USE_DOCKER_MODEL_RUNNER=true` build arg to separate different model providers or deployment scenarios.
 
 - 🛡️ **Granular Permissions and User Groups**: By allowing administrators to create detailed user roles and permissions, we ensure a secure user environment. This granularity not only enhances security but also allows for customized user experiences, fostering a sense of ownership and responsibility amongst users.
 

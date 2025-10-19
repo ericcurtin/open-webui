@@ -1,18 +1,30 @@
 # Docker Model Runner
 
-Docker Model Runner is an LLM provider integration for Open WebUI that provides Ollama-compatible API functionality with equal or better features than Ollama.
+Docker Model Runner is an LLM provider integration for Open WebUI that runs a secondary Ollama instance on port 11435. This allows you to separate different model providers, deployment scenarios, or simply run multiple Ollama instances within the same infrastructure.
+
+**Technical Note**: Docker Model Runner uses Ollama as its underlying engine, configured to run on port 11435 instead of the default 11434. The Open WebUI router provides unified management, access control, and load balancing across both Ollama instances.
 
 ## Features
 
-- **Ollama-Compatible API**: Fully compatible with Ollama API endpoints
+- **Ollama-Compatible API**: Uses Ollama's API (same as standard Ollama integration)
+- **Separate Port**: Runs on port 11435 (vs Ollama's 11434) for multi-provider scenarios
 - **Bundled Docker Support**: Can be included in the Open WebUI Docker container
-- **Multiple Instance Support**: Configure multiple Docker Model Runner instances
-- **Load Balancing**: Round-robin distribution across multiple backends
-- **Model Management**: Pull, push, create, copy, and delete models
+- **Multiple Instance Support**: Configure multiple instances for load balancing
+- **Load Balancing**: Round-robin distribution via Open WebUI router
+- **Model Management**: Full Ollama model management capabilities
 - **Chat Completions**: Stream and non-stream chat completions
 - **Embeddings**: Generate embeddings for RAG and search
-- **Access Control**: Per-model access control and user permissions
+- **Access Control**: Per-model access control via Open WebUI
 - **Model Prefixing**: Add prefixes to differentiate models from different sources
+
+## Use Cases
+
+Docker Model Runner is useful when you need to:
+1. **Separate Production/Development**: Run production models on standard Ollama (11434) and development models on Docker Model Runner (11435)
+2. **Multi-tenant Isolation**: Isolate models for different teams or projects
+3. **Different Model Sets**: Keep frequently-used models on one instance and experimental models on another
+4. **Load Distribution**: Distribute load across multiple Ollama instances
+5. **Testing**: Test new Ollama versions without affecting production
 
 ## Installation
 
@@ -171,22 +183,24 @@ curl http://localhost:3000/docker-model-runner/api/embeddings \
   }'
 ```
 
-## Comparison with Ollama
+## Comparison with Standard Ollama Integration
 
-Docker Model Runner provides equivalent functionality to Ollama with these advantages:
+Docker Model Runner is a second Ollama instance configured to run on port 11435, providing the following deployment flexibility:
 
-| Feature | Ollama | Docker Model Runner |
-|---------|--------|---------------------|
-| Ollama API Compatibility | ✅ | ✅ |
+| Feature | Standard Ollama (Port 11434) | Docker Model Runner (Port 11435) |
+|---------|------------------------------|----------------------------------|
+| Ollama API Compatibility | ✅ | ✅ (Same as Ollama) |
 | Bundled in Docker | ✅ | ✅ |
 | Multiple Instances | ✅ | ✅ |
 | Model Management | ✅ | ✅ |
 | Chat Completions | ✅ | ✅ |
 | Embeddings | ✅ | ✅ |
-| Custom Port | Manual | ✅ Built-in (11435) |
-| Load Balancing | ✅ | ✅ |
-| Access Control | Via Open WebUI | ✅ Integrated |
-| Connection Type Tag | ❌ | ✅ |
+| Default Port | 11434 | 11435 (Separate) |
+| Load Balancing | ✅ Via Open WebUI | ✅ Via Open WebUI |
+| Access Control | ✅ Via Open WebUI | ✅ Via Open WebUI |
+| Connection Type Tag | ✅ Via Router Config | ✅ Via Router Config (default: "docker") |
+
+**Note**: Docker Model Runner uses Ollama under the hood, configured on port 11435. The Open WebUI router integration adds connection type tagging and unified access control for both providers.
 
 ## Troubleshooting
 

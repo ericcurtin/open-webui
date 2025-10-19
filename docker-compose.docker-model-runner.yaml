@@ -1,17 +1,23 @@
 # Docker Compose configuration for Open WebUI with Docker Model Runner
 # 
-# This configuration demonstrates how to use Docker Model Runner as an additional
-# LLM provider alongside Ollama in Open WebUI
+# Docker Model Runner is a secondary Ollama instance running on port 11435.
+# This allows you to run two separate Ollama instances for different use cases:
+#   - Standard Ollama (11434): Production models, frequently-used models
+#   - Docker Model Runner (11435): Development models, experimental models, or load distribution
 #
 # Usage:
 #   docker-compose -f docker-compose.docker-model-runner.yaml up -d
 #
 # Features:
-#   - Open WebUI with both Ollama and Docker Model Runner
-#   - Ollama on port 11434 (standard)
-#   - Docker Model Runner on port 11435 (bundled)
-#   - Persistent storage for models and data
+#   - Open WebUI with dual Ollama instances
+#   - Standard Ollama on port 11434
+#   - Docker Model Runner (secondary Ollama) on port 11435
+#   - Shared persistent storage for models and data
 #   - GPU support (optional)
+#
+# Note: Running both instances doubles the resource usage. For most use cases,
+# you only need one Ollama instance. Enable both only if you have a specific
+# need for separated model providers (e.g., prod/dev separation, multi-tenant).
 
 version: '3.8'
 
@@ -23,11 +29,13 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        # Enable Docker Model Runner bundled in the container
+        # Enable Docker Model Runner (secondary Ollama on port 11435)
         USE_DOCKER_MODEL_RUNNER: true
-        # Optional: Enable Ollama as well for dual provider setup
+        # Enable standard Ollama as well for dual instance setup
+        # WARNING: This runs two Ollama instances and doubles resource usage
+        # Only enable if you need separated model providers (prod/dev, multi-tenant, etc.)
         USE_OLLAMA: true
-        # Optional: Enable CUDA for GPU support
+        # Optional: Enable CUDA for GPU support (applies to both instances)
         # USE_CUDA: true
         # USE_CUDA_VER: cu121
     ports:
