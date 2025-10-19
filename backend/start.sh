@@ -40,6 +40,12 @@ if [[ "${USE_OLLAMA_DOCKER,,}" == "true" ]]; then
     ollama serve &
 fi
 
+if [[ "${USE_DOCKER_MODEL_RUNNER_DOCKER,,}" == "true" ]]; then
+    echo "USE_DOCKER_MODEL_RUNNER is set to true, starting Docker Model Runner (Ollama-compatible on port 11435)."
+    # Start Ollama on a different port for Docker Model Runner
+    OLLAMA_HOST=127.0.0.1:11435 ollama serve &
+fi
+
 if [[ "${USE_CUDA_DOCKER,,}" == "true" ]]; then
   echo "CUDA is enabled, appending LD_LIBRARY_PATH to include torch/cudnn & cublas libraries."
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib/python3.11/site-packages/torch/lib:/usr/local/lib/python3.11/site-packages/nvidia/cudnn/lib"

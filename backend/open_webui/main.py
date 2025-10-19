@@ -71,6 +71,7 @@ from open_webui.routers import (
     audio,
     images,
     ollama,
+    docker_model_runner,
     openai,
     retrieval,
     pipelines,
@@ -114,6 +115,10 @@ from open_webui.config import (
     ENABLE_OLLAMA_API,
     OLLAMA_BASE_URLS,
     OLLAMA_API_CONFIGS,
+    # Docker Model Runner
+    ENABLE_DOCKER_MODEL_RUNNER_API,
+    DOCKER_MODEL_RUNNER_BASE_URLS,
+    DOCKER_MODEL_RUNNER_API_CONFIGS,
     # OpenAI
     ENABLE_OPENAI_API,
     OPENAI_API_BASE_URLS,
@@ -661,6 +666,18 @@ app.state.config.OLLAMA_BASE_URLS = OLLAMA_BASE_URLS
 app.state.config.OLLAMA_API_CONFIGS = OLLAMA_API_CONFIGS
 
 app.state.OLLAMA_MODELS = {}
+
+########################################
+#
+# DOCKER MODEL RUNNER
+#
+########################################
+
+app.state.config.ENABLE_DOCKER_MODEL_RUNNER_API = ENABLE_DOCKER_MODEL_RUNNER_API
+app.state.config.DOCKER_MODEL_RUNNER_BASE_URLS = DOCKER_MODEL_RUNNER_BASE_URLS
+app.state.config.DOCKER_MODEL_RUNNER_API_CONFIGS = DOCKER_MODEL_RUNNER_API_CONFIGS
+
+app.state.DOCKER_MODEL_RUNNER_MODELS = {}
 
 ########################################
 #
@@ -1281,6 +1298,7 @@ app.mount("/ws", socket_app)
 
 
 app.include_router(ollama.router, prefix="/ollama", tags=["ollama"])
+app.include_router(docker_model_runner.router, prefix="/docker-model-runner", tags=["docker_model_runner"])
 app.include_router(openai.router, prefix="/openai", tags=["openai"])
 
 
