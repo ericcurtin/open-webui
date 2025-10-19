@@ -92,6 +92,7 @@ log_sources = [
     "MAIN",
     "MODELS",
     "OLLAMA",
+    "DOCKER_MODEL_RUNNER",
     "OPENAI",
     "RAG",
     "WEBHOOK",

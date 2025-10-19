@@ -999,6 +999,61 @@ OLLAMA_API_CONFIGS = PersistentConfig(
 )
 
 ####################################
+# DOCKER_MODEL_RUNNER
+####################################
+
+ENABLE_DOCKER_MODEL_RUNNER_API = PersistentConfig(
+    "ENABLE_DOCKER_MODEL_RUNNER_API",
+    "docker_model_runner.enable",
+    os.environ.get("ENABLE_DOCKER_MODEL_RUNNER_API", "True").lower() == "true",
+)
+
+DOCKER_MODEL_RUNNER_API_BASE_URL = os.environ.get(
+    "DOCKER_MODEL_RUNNER_API_BASE_URL", "http://localhost:11435/api"
+)
+
+DOCKER_MODEL_RUNNER_BASE_URL = os.environ.get("DOCKER_MODEL_RUNNER_BASE_URL", "")
+if DOCKER_MODEL_RUNNER_BASE_URL:
+    # Remove trailing slash
+    DOCKER_MODEL_RUNNER_BASE_URL = (
+        DOCKER_MODEL_RUNNER_BASE_URL[:-1] if DOCKER_MODEL_RUNNER_BASE_URL.endswith("/") else DOCKER_MODEL_RUNNER_BASE_URL
+    )
+
+USE_DOCKER_MODEL_RUNNER_DOCKER = os.environ.get("USE_DOCKER_MODEL_RUNNER_DOCKER", "false")
+
+if DOCKER_MODEL_RUNNER_BASE_URL == "" and DOCKER_MODEL_RUNNER_API_BASE_URL != "":
+    DOCKER_MODEL_RUNNER_BASE_URL = (
+        DOCKER_MODEL_RUNNER_API_BASE_URL[:-4]
+        if DOCKER_MODEL_RUNNER_API_BASE_URL.endswith("/api")
+        else DOCKER_MODEL_RUNNER_API_BASE_URL
+    )
+
+if ENV == "prod":
+    if DOCKER_MODEL_RUNNER_BASE_URL == "/docker-model-runner" and not K8S_FLAG:
+        if USE_DOCKER_MODEL_RUNNER_DOCKER.lower() == "true":
+            # if you use all-in-one docker container (Open WebUI + Docker Model Runner)
+            # with the docker build arg USE_DOCKER_MODEL_RUNNER=true this only works with http://localhost:11435
+            DOCKER_MODEL_RUNNER_BASE_URL = "http://localhost:11435"
+        else:
+            DOCKER_MODEL_RUNNER_BASE_URL = "http://host.docker.internal:11435"
+    elif K8S_FLAG:
+        DOCKER_MODEL_RUNNER_BASE_URL = "http://docker-model-runner-service.open-webui.svc.cluster.local:11435"
+
+DOCKER_MODEL_RUNNER_BASE_URLS = os.environ.get("DOCKER_MODEL_RUNNER_BASE_URLS", "")
+DOCKER_MODEL_RUNNER_BASE_URLS = DOCKER_MODEL_RUNNER_BASE_URLS if DOCKER_MODEL_RUNNER_BASE_URLS != "" else DOCKER_MODEL_RUNNER_BASE_URL
+
+DOCKER_MODEL_RUNNER_BASE_URLS = [url.strip() for url in DOCKER_MODEL_RUNNER_BASE_URLS.split(";")]
+DOCKER_MODEL_RUNNER_BASE_URLS = PersistentConfig(
+    "DOCKER_MODEL_RUNNER_BASE_URLS", "docker_model_runner.base_urls", DOCKER_MODEL_RUNNER_BASE_URLS
+)
+
+DOCKER_MODEL_RUNNER_API_CONFIGS = PersistentConfig(
+    "DOCKER_MODEL_RUNNER_API_CONFIGS",
+    "docker_model_runner.api_configs",
+    {},
+)
+
+####################################
 # OPENAI_API
 ####################################
 

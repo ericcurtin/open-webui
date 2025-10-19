@@ -3,6 +3,7 @@
 # use build args in the docker build command with --build-arg="BUILDARG=true"
 ARG USE_CUDA=false
 ARG USE_OLLAMA=false
+ARG USE_DOCKER_MODEL_RUNNER=false
 ARG USE_SLIM=false
 ARG USE_PERMISSION_HARDENING=false
 # Tested with cu117 for CUDA 11 and cu121 for CUDA 12 (default)
@@ -47,6 +48,7 @@ FROM python:3.11-slim-bookworm AS base
 # Use args
 ARG USE_CUDA
 ARG USE_OLLAMA
+ARG USE_DOCKER_MODEL_RUNNER
 ARG USE_CUDA_VER
 ARG USE_SLIM
 ARG USE_PERMISSION_HARDENING
@@ -60,6 +62,7 @@ ENV ENV=prod \
     PORT=8080 \
     # pass build args to the build
     USE_OLLAMA_DOCKER=${USE_OLLAMA} \
+    USE_DOCKER_MODEL_RUNNER_DOCKER=${USE_DOCKER_MODEL_RUNNER} \
     USE_CUDA_DOCKER=${USE_CUDA} \
     USE_SLIM_DOCKER=${USE_SLIM} \
     USE_CUDA_DOCKER_VER=${USE_CUDA_VER} \
@@ -68,6 +71,7 @@ ENV ENV=prod \
 
 ## Basis URL Config ##
 ENV OLLAMA_BASE_URL="/ollama" \
+    DOCKER_MODEL_RUNNER_BASE_URL="/docker-model-runner" \
     OPENAI_API_BASE_URL=""
 
 ## API Key and Security Config ##
@@ -151,6 +155,14 @@ RUN pip3 install --no-cache-dir uv && \
 RUN if [ "$USE_OLLAMA" = "true" ]; then \
     date +%s > /tmp/ollama_build_hash && \
     echo "Cache broken at timestamp: `cat /tmp/ollama_build_hash`" && \
+    curl -fsSL https://ollama.com/install.sh | sh && \
+    rm -rf /var/lib/apt/lists/*; \
+    fi
+
+# Install Docker Model Runner if requested (Ollama-compatible)
+RUN if [ "$USE_DOCKER_MODEL_RUNNER" = "true" ]; then \
+    date +%s > /tmp/docker_model_runner_build_hash && \
+    echo "Installing Docker Model Runner (Ollama-compatible) at timestamp: `cat /tmp/docker_model_runner_build_hash`" && \
     curl -fsSL https://ollama.com/install.sh | sh && \
     rm -rf /var/lib/apt/lists/*; \
     fi
