@@ -1,0 +1,118 @@
+# Docker Compose configuration for Open WebUI with Docker Model Runner
+# 
+# This configuration demonstrates how to use Docker Model Runner as an additional
+# LLM provider alongside Ollama in Open WebUI
+#
+# Usage:
+#   docker-compose -f docker-compose.docker-model-runner.yaml up -d
+#
+# Features:
+#   - Open WebUI with both Ollama and Docker Model Runner
+#   - Ollama on port 11434 (standard)
+#   - Docker Model Runner on port 11435 (bundled)
+#   - Persistent storage for models and data
+#   - GPU support (optional)
+
+version: '3.8'
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui-docker-model-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Enable Docker Model Runner bundled in the container
+        USE_DOCKER_MODEL_RUNNER: true
+        # Optional: Enable Ollama as well for dual provider setup
+        USE_OLLAMA: true
+        # Optional: Enable CUDA for GPU support
+        # USE_CUDA: true
+        # USE_CUDA_VER: cu121
+    ports:
+      - "3000:8080"
+    environment:
+      # Enable Docker Model Runner API
+      - ENABLE_DOCKER_MODEL_RUNNER_API=true
+      # Docker Model Runner will run on localhost:11435
+      - DOCKER_MODEL_RUNNER_BASE_URL=http://localhost:11435
+      
+      # Enable Ollama API (optional for dual provider)
+      - ENABLE_OLLAMA_API=true
+      - OLLAMA_BASE_URL=http://localhost:11434
+      
+      # Optional: Configure API keys for security
+      # - WEBUI_SECRET_KEY=your-secret-key-here
+      
+      # Optional: Admin user creation
+      # - WEBUI_AUTH=false
+      # - DEFAULT_USER_ROLE=admin
+      
+      # Optional: Enable model caching
+      # - ENABLE_BASE_MODELS_CACHE=true
+      
+    volumes:
+      # Persist Open WebUI data
+      - open-webui-data:/app/backend/data
+      # Persist Ollama models (if using both providers)
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    # Optional: Add GPU support
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  open-webui-data:
+    name: open-webui-data
+  ollama-data:
+    name: ollama-data
+
+# Alternative configuration: External Docker Model Runner
+# 
+# If you prefer to run Docker Model Runner separately, use this configuration:
+#
+# version: '3.8'
+# 
+# services:
+#   docker-model-runner:
+#     image: ollama/ollama:latest
+#     container_name: docker-model-runner
+#     ports:
+#       - "11435:11434"
+#     environment:
+#       - OLLAMA_HOST=0.0.0.0:11434
+#     volumes:
+#       - docker-model-runner-data:/root/.ollama
+#     restart: unless-stopped
+#     # Optional: GPU support
+#     # deploy:
+#     #   resources:
+#     #     reservations:
+#     #       devices:
+#     #         - driver: nvidia
+#     #           count: 1
+#     #           capabilities: [gpu]
+# 
+#   open-webui:
+#     image: ghcr.io/open-webui/open-webui:main
+#     container_name: open-webui
+#     ports:
+#       - "3000:8080"
+#     environment:
+#       - ENABLE_DOCKER_MODEL_RUNNER_API=true
+#       - DOCKER_MODEL_RUNNER_BASE_URL=http://docker-model-runner:11434
+#     volumes:
+#       - open-webui-data:/app/backend/data
+#     depends_on:
+#       - docker-model-runner
+#     restart: unless-stopped
+# 
+# volumes:
+#   open-webui-data:
+#   docker-model-runner-data:
